@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='mlarchive2maildir',
-    version='0.0.1',
+    version='0.0.2',
     description='Imports mail from (pipermail) archives into a maildir',
     install_requires=['bs4', 'requests', 'cleo'],
     tests_require=[],

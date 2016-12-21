@@ -1,5 +1,7 @@
 import re
 
+import six
+
 
 def _deobfuscate_addr(addr):
     """replaces some obfuscaded mail addresses to their real ones"""
@@ -10,7 +12,7 @@ def _deobfuscate_addr(addr):
 
 def deobfuscate(message):
     for header in ('To', 'From', 'Cc', 'Reply-To'):
-        if message[header]:
+        if message[header] and isinstance(message[header], six.string_types):
             deobf_addr = _deobfuscate_addr(message[header])
             del message[header]
             message[header] = deobf_addr
