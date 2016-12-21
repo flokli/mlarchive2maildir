@@ -27,12 +27,12 @@ class MessageIdMaildir(mailbox.Maildir):
 
     def add(self, message):
         super().add(message)
-        self._message_ids.add(message['message-id'])
+        self._message_ids[message['message-id']] = True
 
     def _build_msgid_cache(self):
-        self._message_ids = set()
+        self._message_ids = dict()
         for key, message in self.items():
-            self._message_ids.add(message['message-id'])
+            self._message_ids[message['message-id']] = True
 
     def contains_msgid(self, message_id):
         return message_id in self._message_ids
