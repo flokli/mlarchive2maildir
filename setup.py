@@ -11,15 +11,15 @@ setup(
     setup_requires=['setuptools_scm'],
     install_requires=[
         'bs4',
+        'click',
         'requests',
-        'cleo',
         'six'
     ],
     tests_require=[],
     packages=find_packages(),
     entry_points={
         'console_scripts': {
-            'mlarchive2maildir = mlarchive2maildir.commands:main'
+            'mlarchive2maildir = mlarchive2maildir.commands:cli'
         }
     },
 )

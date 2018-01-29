@@ -1,55 +1,46 @@
 import logging
 
-from cleo import Application, Command
+import click
 
 from mlarchive2maildir.mailbox import locked_messageid_maildir
 from mlarchive2maildir.pipermail import get_mbox_urls
 
 
-class ImportCommand(Command):
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('import')
+@click.argument('url')
+@click.argument('maildir', type=click.Path())
+@click.option('--list-id', required=True, help='The List-Id header to set')
+@click.option('--reply-to', help='The Reply-To header to set')
+def cli_import(**kwargs):
     """
-    Imports mails from pipermail. Pass either the url to the archive listing, or an URL to a specific mbox
-
-    import
-        {url : The URL of one pipermail archive listing or a specific mbox file}
-        {maildir : The path to the maildir folder. Will be created if it doesn't exist already}
-        {--list-id= : The List-Id header to set}
-        {--reply-to= : The Reply-To header to set}
+    Imports mails from pipermail. Pass either the URL to the archive listing, or to a specific mbox
     """
+    url = kwargs['url']
+    maildir_path = kwargs['maildir']
+    list_id = kwargs['list_id']
+    reply_to = kwargs['reply_to']
 
-    def handle(self):
-        url = self.argument('url')
-        maildir_path = self.argument('maildir')
+    headers = dict()
+    if list_id:
+        headers['List-Id'] = list_id
+    if reply_to:
+        headers['Reply-To'] = reply_to
 
-        headers = dict()
-        for header in ['List-Id', 'Reply-To']:
-            if self.option(header.lower()):
-                headers[header] = self.option(header.lower())
+    with locked_messageid_maildir(maildir_path) as maildir:
+        if url.endswith('.txt') or url.endswith('.txt.gz'):
+            maildir.import_mbox_from_url(url, headers)
+        if '/pipermail/' in url:
+            logging.info('Querying {} for mbox urls'.format(url))
+            mbox_urls = list(get_mbox_urls(url))
 
-        with locked_messageid_maildir(maildir_path) as maildir:
-            if url.endswith('.txt') or url.endswith('.txt.gz'):
-                maildir.import_mbox_from_url(url, headers)
-            if '/pipermail/' in url:
-                logging.info('Querying {} for mbox urls'.format(url))
-                mbox_urls = list(get_mbox_urls(url))
-                progress = self.progress_bar(len(mbox_urls))
-                for mbox_url in mbox_urls:
+            with click.progressbar(mbox_urls) as bar:
+                for mbox_url in bar:
                     maildir.import_mbox_from_url(mbox_url, headers)
-                    progress.advance()
-            else:
-                self.error('unknown url, exiting')
-                return -1
-
-    @staticmethod
-    def _import_mbox_url(maildir, url):
-        logging.debug('importing mbox from {}'.format(url))
-        maildir.import_mbox_from_url(url)
-
-
-def main():
-    application = Application()
-    application.add(ImportCommand())
-    application.run()
-
-if __name__ == '__main__':
-    main()
+        else:
+            click.echo(click.style('Unknown URL, exiting!', fg='red'))
+            return -1
