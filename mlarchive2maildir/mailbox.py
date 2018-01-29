@@ -64,8 +64,10 @@ class MessageIdMaildir(mailbox.Maildir):
 
                 deobfuscate(message)
 
+                logger = logging.getLogger(__name__)
+
                 if not self.contains_msgid(message['message-id']):
-                    logging.debug('imported {}'.format(message['message-id']))
+                    logger.debug('imported {}'.format(message['message-id']))
 
                     if headers:
                         for (header, value) in headers.items():
@@ -74,7 +76,7 @@ class MessageIdMaildir(mailbox.Maildir):
 
                     self.add(message)
                 else:
-                    logging.warning('maildir already contains msgid {} ({}), skipping…'.format(message['message-id'],
+                    logger.warning('maildir already contains msgid {} ({}), skipping…'.format(message['message-id'],
                                                                                                message['subject']))
 
 

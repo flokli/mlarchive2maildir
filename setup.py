@@ -12,6 +12,7 @@ setup(
     install_requires=[
         'bs4',
         'click',
+        'click-log',
         'requests',
         'six'
     ],

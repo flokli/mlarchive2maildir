@@ -1,12 +1,16 @@
 import logging
 
 import click
+import click_log
 
 from mlarchive2maildir.mailbox import locked_messageid_maildir
 from mlarchive2maildir.pipermail import get_mbox_urls
 
+logger = logging.getLogger()
+click_log.basic_config(logger)
 
 @click.group()
+@click_log.simple_verbosity_option(logger)
 def cli():
     pass
 
@@ -35,7 +39,7 @@ def cli_import(**kwargs):
         if url.endswith('.txt') or url.endswith('.txt.gz'):
             maildir.import_mbox_from_url(url, headers)
         if '/pipermail/' in url:
-            logging.info('Querying {} for mbox urls'.format(url))
+            logger.debug('Querying {} for mbox urls'.format(url))
             mbox_urls = list(get_mbox_urls(url))
 
             with click.progressbar(mbox_urls) as bar:
