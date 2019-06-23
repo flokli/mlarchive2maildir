@@ -10,7 +10,7 @@ setup(
     use_scm_version={'write_to': 'mlarchive2maildir/version.py'},
     setup_requires=['setuptools_scm'],
     install_requires=[
-        'bs4',
+        'beautifulsoup4',
         'click',
         'click-log',
         'requests',
