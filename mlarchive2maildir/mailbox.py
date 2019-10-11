@@ -45,15 +45,15 @@ class MessageIdMaildir(mailbox.Maildir):
 
         if url.endswith('.txt'):
             suffix = '.txt'
-        elif url.endswith('.txt.gz'):
-            suffix = '.txt.gz'
+        elif url.endswith('.gz'):
+            suffix = '.gz'
         else:
             raise Exception('Invalid file suffix')
 
         # get archive url stream
         stream = BytesIO(requests.get(url).content)
 
-        if suffix == '.txt.gz':
+        if suffix == '.gz':
             stream = gzip.open(stream)
 
         # open mbox

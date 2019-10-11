@@ -36,7 +36,7 @@ def cli_import(**kwargs):
         headers['Reply-To'] = reply_to
 
     with locked_messageid_maildir(maildir_path) as maildir:
-        if url.endswith('.txt') or url.endswith('.txt.gz'):
+        if url.endswith('.txt') or url.endswith('.gz'):
             maildir.import_mbox_from_url(url, headers)
         if '/pipermail/' in url:
             logger.debug('Querying {} for mbox urls'.format(url))
