@@ -36,16 +36,20 @@ def cli_import(**kwargs):
         headers['Reply-To'] = reply_to
 
     with locked_messageid_maildir(maildir_path) as maildir:
+        mbox_urls = []
         if url.endswith('.txt') or url.endswith('.gz'):
-            maildir.import_mbox_from_url(url, headers)
+            mbox_urls.append(url)
         else:
             logger.debug('Querying {} for mbox urls'.format(url))
-            mbox_urls = list(get_mbox_urls(url))
-            if len(mbox_urls) == 0:
-                click.echo(click.style('Unable to find any mboxes at {}, exiting!', fg='red'))
-                return -1
+            mbox_urls.extend(get_mbox_urls(url))
 
+        if len(mbox_urls) == 0:
+            logger.critical("Unable to find any mboxes at {}, exiting!")
+            return -1
 
-            with click.progressbar(mbox_urls) as bar:
-                for mbox_url in bar:
+        with click.progressbar(mbox_urls) as bar:
+            for mbox_url in bar:
+                try:
                     maildir.import_mbox_from_url(mbox_url, headers)
+                except UnicodeDecodeError as e:
+                    logger.warning("Error importing mbox at {}, skipping: {}".format(mbox_url, e))
