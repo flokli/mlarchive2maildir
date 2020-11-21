@@ -38,13 +38,14 @@ def cli_import(**kwargs):
     with locked_messageid_maildir(maildir_path) as maildir:
         if url.endswith('.txt') or url.endswith('.gz'):
             maildir.import_mbox_from_url(url, headers)
-        elif '/pipermail/' in url:
+        else:
             logger.debug('Querying {} for mbox urls'.format(url))
             mbox_urls = list(get_mbox_urls(url))
+            if len(mbox_urls) == 0:
+                click.echo(click.style('Unable to find any mboxes at {}, exiting!', fg='red'))
+                return -1
+
 
             with click.progressbar(mbox_urls) as bar:
                 for mbox_url in bar:
                     maildir.import_mbox_from_url(mbox_url, headers)
-        else:
-            click.echo(click.style('Unknown URL, exiting!', fg='red'))
-            return -1
