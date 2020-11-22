@@ -8,4 +8,6 @@ def get_mbox_urls(url):
     soup = BeautifulSoup(r.text, 'html.parser')
     for link in soup.find_all('a'):
         if 'Text' in link.text:
-            yield '{}/{}'.format(url, link.get('href'))
+            href = link.get('href')
+            if href.endswith('.txt') or href.endswith('.txt.gz'):
+                yield '{}/{}'.format(url, link.get('href'))
